@@ -85,6 +85,7 @@ public:
     
     // Instructions
     void ADD_A(Register target);
+    void SUB_A(Register target);
 
 private:
     
@@ -96,4 +97,6 @@ private:
     uint8_t reg_F = 0;
     uint8_t reg_H = 0;
     uint8_t reg_L = 0;
+
+    Value8 CPU::getVal8FromReg(Register target);
 };
