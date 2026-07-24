@@ -2,9 +2,13 @@
 
 #include <cstdint>
 
+#include "Types.hpp"
+
 class CPU {
 
 public:
+
+    CPU() = default;
 
     // 8 bit registers
     inline uint8_t getA()         { return reg_A; }
@@ -64,10 +68,23 @@ public:
     }
 
     // Flag register (F)
-    inline bool flagZero()      { return reg_F & 0x80; }
-    inline bool flagSubtract()  { return reg_F & 0x40; }
-    inline bool flagHalfCarry() { return reg_F & 0x20; }
-    inline bool flagCarry()     { return reg_F & 0x10; }
+    inline bool flagZero()   { return reg_F & 0x80; }
+    inline bool flagSub()    { return reg_F & 0x40; }
+    inline bool flagHCarry() { return reg_F & 0x20; }
+    inline bool flagCarry()  { return reg_F & 0x10; }
+
+    inline void setFlagZero()   { reg_F |= 0x80; }
+    inline void setFlagSub()    { reg_F |= 0x40; }
+    inline void setFlagHCarry() { reg_F |= 0x20; }
+    inline void setFlagCarry()  { reg_F |= 0x10; }
+
+    inline void resetFlagZero()   { reg_F &= 0x7F; }
+    inline void resetFlagSub()    { reg_F &= 0xBF; }
+    inline void resetFlagHCarry() { reg_F &= 0xDF; }
+    inline void resetFlagCarry()  { reg_F &= 0xEF; }
+    
+    // Instructions
+    void ADD_A(Register target);
 
 private:
     
