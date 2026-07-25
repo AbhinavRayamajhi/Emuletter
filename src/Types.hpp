@@ -8,5 +8,5 @@ enum class Register {
 };
 
 enum class Instructions {
-    ADD,
+    ADD, SUB, ADC, SBC
 };

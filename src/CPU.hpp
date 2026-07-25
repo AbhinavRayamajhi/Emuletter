@@ -84,8 +84,14 @@ public:
     inline void resetFlagCarry()  { reg_F &= 0xEF; }
     
     // Instructions
-    void ADD_A(Register target);
-    void SUB_A(Register target);
+    void ADC(Register target);
+    void SBC(Register target);
+    
+    void ADD8(Register target);
+    void SUB8(Register target);
+
+    void INC(Register target);
+    void DEC(Register target);
 
 private:
     
@@ -99,4 +105,5 @@ private:
     uint8_t reg_L = 0;
 
     Value8 CPU::getVal8FromReg(Register target);
+    void CPU::setVal8ToReg(Register target, Value8 val);
 };
