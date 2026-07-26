@@ -133,7 +133,7 @@ void CPU::SUB8(Register target) {
     SBC(target);
 }
 
-void CPU::INC(Register target) {
+void CPU::INC8(Register target) {
 
     Value8 val = getVal8FromReg(target);
 
@@ -148,7 +148,7 @@ void CPU::INC(Register target) {
     else resetFlagZero();
 }
 
-void CPU::DEC(Register target) {
+void CPU::DEC8(Register target) {
 
     Value8 val = getVal8FromReg(target);
 
@@ -161,4 +161,56 @@ void CPU::DEC(Register target) {
 
     if (val == 0) setFlagZero();
     else resetFlagZero();
+}
+
+void CPU::AND(Register target) {
+
+    reg_A &= getVal8FromReg(target);
+
+    if (reg_A == 0) setFlagZero();
+    else resetFlagZero();
+
+    resetFlagSub();
+    setFlagHCarry();
+    resetFlagCarry();
+}
+
+void CPU::OR(Register target) {
+
+    reg_A |= getVal8FromReg(target);
+
+    if (reg_A == 0) setFlagZero();
+    else resetFlagZero();
+
+    resetFlagSub();
+    resetFlagHCarry();
+    resetFlagCarry();
+}
+
+void CPU::XOR(Register target) {
+
+    reg_A ^= getVal8FromReg(target);
+
+    if (reg_A == 0) setFlagZero();
+    else resetFlagZero();
+
+    resetFlagSub();
+    resetFlagHCarry();
+    resetFlagCarry();
+}
+
+void CPU::CP(Register target) {
+
+    Value8 val = getVal8FromReg(target);
+
+    if (reg_A == val) setFlagZero();
+    else resetFlagZero();
+
+    setFlagSub();
+
+    if ((val & 0xF) > (reg_A & 0xF) ) setFlagHCarry();
+    else resetFlagHCarry();
+
+    if (val > reg_A ) setFlagCarry();
+    else resetFlagCarry();
 }

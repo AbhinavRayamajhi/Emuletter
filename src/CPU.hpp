@@ -90,8 +90,13 @@ public:
     void ADD8(Register target);
     void SUB8(Register target);
 
-    void INC(Register target);
-    void DEC(Register target);
+    void INC8(Register target);
+    void DEC8(Register target);
+
+    void AND(Register target);
+    void OR(Register target);
+    void XOR(Register target);
+    void CP(Register target);
 
 private:
     
