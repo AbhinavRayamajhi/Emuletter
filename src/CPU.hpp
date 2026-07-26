@@ -3,12 +3,15 @@
 #include <cstdint>
 
 #include "Types.hpp"
+#include "Memory.hpp"
 
 class CPU {
 
 public:
 
-    CPU() = default;
+    // Each CPU needs a pointer to memory so no default construction
+    CPU() = delete;
+    CPU(Memory* mem) : RAM(mem) {}
 
     // 8 bit registers
     inline uint8_t getA()         { return reg_A; }
@@ -108,6 +111,8 @@ private:
     Reg reg_F = 0;
     Reg reg_H = 0;
     Reg reg_L = 0;
+
+    Memory* RAM;
 
     Reg* CPU::selectReg(Register target);
 };
