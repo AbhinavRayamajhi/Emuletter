@@ -100,15 +100,14 @@ public:
 
 private:
     
-    uint8_t reg_A = 0;
-    uint8_t reg_B = 0;
-    uint8_t reg_C = 0;
-    uint8_t reg_D = 0;
-    uint8_t reg_E = 0;
-    uint8_t reg_F = 0;
-    uint8_t reg_H = 0;
-    uint8_t reg_L = 0;
+    Reg reg_A = 0;
+    Reg reg_B = 0;
+    Reg reg_C = 0;
+    Reg reg_D = 0;
+    Reg reg_E = 0;
+    Reg reg_F = 0;
+    Reg reg_H = 0;
+    Reg reg_L = 0;
 
-    Value8 CPU::getVal8FromReg(Register target);
-    void CPU::setVal8ToReg(Register target, Value8 val);
+    Reg* CPU::selectReg(Register target);
 };

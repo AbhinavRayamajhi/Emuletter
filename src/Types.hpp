@@ -1,5 +1,6 @@
 #pragma once
 
+using Reg = uint8_t;
 using Value8 = uint8_t;
 using Value16 = uint16_t;
 

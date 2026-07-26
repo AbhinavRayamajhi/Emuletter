@@ -2,88 +2,41 @@
 
 #include <cassert>
 
-Value8 CPU::getVal8FromReg(Register target) {
-
-    Value8 val = 0;
-
-    switch (target) {
-
-    case Register::A:
-        val = reg_A;
-        break;
-
-    case Register::B:
-        val = reg_B;
-        break;
-
-    case Register::C:
-        val = reg_C;
-        break;
-
-    case Register::D:
-        val = reg_D;
-        break;
-
-    case Register::E:
-        val = reg_E;
-        break;
-
-    case Register::H:
-        val = reg_H;
-        break;
-        
-    case Register::L:
-        val = reg_L;
-        break;
-
-    default:
-        assert(0 && "Invalid Register for Op");
-    }
-
-    return val;
-}
-
-void CPU::setVal8ToReg(Register target, Value8 val) {
+Reg* CPU::selectReg(Register target) {
 
 
     switch (target) {
 
     case Register::A:
-        reg_A = val;
-        break;
+        return &reg_A;
 
     case Register::B:
-        reg_B = val;
-        break;
+        return &reg_B;
 
     case Register::C:
-        reg_C = val;
-        break;
+        return &reg_C;
 
     case Register::D:
-        reg_D = val;
-        break;
+        return &reg_D;
 
     case Register::E:
-        reg_E = val;
-        break;
+        return &reg_E;
 
     case Register::H:
-        reg_H = val;
-        break;
+        return &reg_H;
         
     case Register::L:
-        reg_L = val;
-        break;
+        return &reg_L;
 
     default:
         assert(0 && "Invalid Register for Op");
+        return nullptr;
     }
 }
 
 void CPU::ADC(Register target) {
 
-    Value8 val = getVal8FromReg(target);
+    Value8 val = *selectReg(target);
     bool carryIn = flagCarry();
 
     Value16 newVal = reg_A + val + carryIn;
@@ -104,7 +57,7 @@ void CPU::ADC(Register target) {
 
 void CPU::SBC(Register target) {
 
-    Value8 val = getVal8FromReg(target);
+    Value8 val = *selectReg(target);
     bool carryIn = flagCarry();
 
     setFlagSub();
@@ -135,37 +88,37 @@ void CPU::SUB8(Register target) {
 
 void CPU::INC8(Register target) {
 
-    Value8 val = getVal8FromReg(target);
+    Reg* regToMod = selectReg(target);
 
     resetFlagSub();
 
-    if ((val & 0xF) + 1 > 0xF) setFlagHCarry();
+    if ((*regToMod & 0xF) + 1 > 0xF) setFlagHCarry();
     else resetFlagHCarry();
 
-    setVal8ToReg(target, ++val);
+    *regToMod += 1;
 
-    if (val == 0) setFlagZero();
+    if (*regToMod == 0) setFlagZero();
     else resetFlagZero();
 }
 
 void CPU::DEC8(Register target) {
 
-    Value8 val = getVal8FromReg(target);
+    Reg* regToMod = selectReg(target);
 
     setFlagSub();
 
-    if ((val & 0xF) == 0) setFlagHCarry();
+    if ((*regToMod & 0xF) == 0) setFlagHCarry();
     else resetFlagHCarry();
 
-    setVal8ToReg(target, --val);
+    *regToMod -= 1;
 
-    if (val == 0) setFlagZero();
+    if (*regToMod == 0) setFlagZero();
     else resetFlagZero();
 }
 
 void CPU::AND(Register target) {
 
-    reg_A &= getVal8FromReg(target);
+    reg_A &= *selectReg(target);
 
     if (reg_A == 0) setFlagZero();
     else resetFlagZero();
@@ -177,7 +130,7 @@ void CPU::AND(Register target) {
 
 void CPU::OR(Register target) {
 
-    reg_A |= getVal8FromReg(target);
+    reg_A |= *selectReg(target);
 
     if (reg_A == 0) setFlagZero();
     else resetFlagZero();
@@ -189,7 +142,7 @@ void CPU::OR(Register target) {
 
 void CPU::XOR(Register target) {
 
-    reg_A ^= getVal8FromReg(target);
+    reg_A ^= *selectReg(target);
 
     if (reg_A == 0) setFlagZero();
     else resetFlagZero();
@@ -201,7 +154,7 @@ void CPU::XOR(Register target) {
 
 void CPU::CP(Register target) {
 
-    Value8 val = getVal8FromReg(target);
+    Value8 val = *selectReg(target);
 
     if (reg_A == val) setFlagZero();
     else resetFlagZero();
