@@ -87,19 +87,30 @@ public:
     inline void resetFlagCarry()  { reg_F &= 0xEF; }
     
     // Instructions
-    void ADC(Register target);
-    void SBC(Register target);
+    void ADC(Register reg);
+    void SBC(Register reg);
     
-    void ADD8(Register target);
-    void SUB8(Register target);
+    void ADD(Register reg);
+    void SUB(Register reg);
 
-    void INC8(Register target);
-    void DEC8(Register target);
+    void INC(Register reg);
+    void DEC(Register reg);
 
-    void AND(Register target);
-    void OR(Register target);
-    void XOR(Register target);
-    void CP(Register target);
+    void AND(Register reg);
+    void OR(Register reg);
+    void XOR(Register reg);
+    void CP(Register reg);
+
+    void ADC_HL();
+    void SBC_HL();
+    
+    void ADD8_HL();
+    void SUB8_HL();
+
+    void AND_HL();
+    void OR_HL();
+    void XOR_HL();
+    void CP_HL();
 
 private:
     
@@ -115,4 +126,13 @@ private:
     Memory* RAM;
 
     Reg* CPU::selectReg(Register target);
+
+    template <bool isInc>
+    void CPU::addTemplate8(Register reg);
+
+    template <bool isDec>
+    void CPU::subTemplate8(Register reg);
+
+    template <BitWiseOp op>
+    void CPU::bitwiseTemplate8(Register reg);
 };

@@ -34,136 +34,158 @@ Reg* CPU::selectReg(Register target) {
     }
 }
 
-void CPU::ADC(Register target) {
+// General template for all 8 bit add operations
+template <bool isInc>
+void CPU::addTemplate8(Register reg) {
 
-    Value8 val = *selectReg(target);
-    bool carryIn = flagCarry();
+    Reg* targetReg;
+    Value8 valToAdd;
+    bool carryIn;
 
-    Value16 newVal = reg_A + val + carryIn;
+    if constexpr (isInc) targetReg = selectReg(reg);
+    else targetReg = &reg_A;
+
+    if constexpr (isInc) valToAdd = 1;
+    else valToAdd = *selectReg(reg);
+
+    if constexpr (isInc) carryIn = 0;
+    else carryIn = flagCarry();
+
+    Value16 newVal = *targetReg + valToAdd + carryIn;
 
     resetFlagSub();
 
-    if ((reg_A & 0xF) + (val & 0xF) + carryIn > 0xF) setFlagHCarry();
+    if ((*targetReg & 0xF) + (valToAdd & 0xF) + carryIn > 0xF) setFlagHCarry();
     else resetFlagHCarry();
 
-    if (newVal >= 256) setFlagCarry();
-    else resetFlagCarry();
+    if constexpr (!isInc) {
 
-    reg_A = static_cast<Value8>(newVal);
+        if (newVal >= 256) setFlagCarry();
+        else resetFlagCarry();
+    }
 
-    if (reg_A == 0) setFlagZero();
+    *targetReg = static_cast<Value8>(newVal);
+
+    if (*targetReg == 0) setFlagZero();
     else resetFlagZero();
 }
 
-void CPU::SBC(Register target) {
+void CPU::ADC(Register reg) {
 
-    Value8 val = *selectReg(target);
-    bool carryIn = flagCarry();
+    addTemplate8<false>(reg);
+}
+
+void CPU::ADD(Register reg) {
+
+    resetFlagCarry();
+    addTemplate8<false>(reg);
+}
+
+void CPU::INC(Register reg) {
+
+    addTemplate8<true>(reg);
+}
+
+template <bool isDec>
+void CPU::subTemplate8(Register reg) {
+
+    Reg* targetReg;
+    Value8 valToSub;
+    bool carryIn;
+
+    if constexpr (isDec) targetReg = selectReg(reg);
+    else targetReg = &reg_A;
+
+    if constexpr (isDec) valToSub = 1;
+    else valToSub = *selectReg(reg);
+
+    if constexpr (isDec) carryIn = 0;
+    else carryIn = flagCarry();
 
     setFlagSub();
 
-    if ((val & 0xF) + carryIn > (reg_A & 0xF) ) setFlagHCarry();
+    if ((valToSub & 0xF) + carryIn > (*targetReg & 0xF) ) setFlagHCarry();
     else resetFlagHCarry();
 
-    if (val + carryIn > reg_A ) setFlagCarry();
-    else resetFlagCarry();
+    if constexpr (!isDec) {
 
-    reg_A -= val + carryIn ;
+        if (valToSub + carryIn > *targetReg) setFlagCarry();
+        else resetFlagCarry();
+    }
 
-    if (reg_A == 0) setFlagZero();
+    *targetReg -= valToSub + carryIn ;
+
+    if (*targetReg == 0) setFlagZero();
     else resetFlagZero();
 }
 
-void CPU::ADD8(Register target) {
+void CPU::SBC(Register reg) {
+
+    subTemplate8<false>(reg);
+}
+
+void CPU::SUB(Register reg) {
 
     resetFlagCarry();
-    ADC(target);
+    subTemplate8<false>(reg);
 }
 
-void CPU::SUB8(Register target) {
+void CPU::DEC(Register reg) {
 
-    resetFlagCarry();
-    SBC(target);
+    subTemplate8<true>(reg);
 }
 
-void CPU::INC8(Register target) {
+template <BitWiseOp op>
+void CPU::bitwiseTemplate8(Register reg) {
 
-    Reg* regToMod = selectReg(target);
+    Reg* targetReg = selectReg(reg);
 
-    resetFlagSub();
+    if constexpr (op == BitWiseOp::AND) reg_A &= *targetReg;
+    else if constexpr (op == BitWiseOp::OR) reg_A |= *targetReg;
+    else if constexpr (op == BitWiseOp::XOR) reg_A ^= *targetReg;
 
-    if ((*regToMod & 0xF) + 1 > 0xF) setFlagHCarry();
-    else resetFlagHCarry();
+    if constexpr (op == BitWiseOp::CP) {
 
-    *regToMod += 1;
+        if (reg_A == *targetReg) setFlagZero();
+        else resetFlagZero();
 
-    if (*regToMod == 0) setFlagZero();
-    else resetFlagZero();
+        setFlagSub();
+
+        if ((*targetReg & 0xF) > (reg_A & 0xF) ) setFlagHCarry();
+        else resetFlagHCarry();
+
+        if (*targetReg > reg_A ) setFlagCarry();
+        else resetFlagCarry();
+    }
+    else {
+
+        if (reg_A == 0) setFlagZero();
+        else resetFlagZero();
+
+        resetFlagSub();
+        resetFlagCarry();
+
+        if constexpr (op == BitWiseOp::AND) setFlagHCarry();
+        else resetFlagHCarry();
+    }
 }
 
-void CPU::DEC8(Register target) {
+void CPU::AND(Register reg) {
 
-    Reg* regToMod = selectReg(target);
-
-    setFlagSub();
-
-    if ((*regToMod & 0xF) == 0) setFlagHCarry();
-    else resetFlagHCarry();
-
-    *regToMod -= 1;
-
-    if (*regToMod == 0) setFlagZero();
-    else resetFlagZero();
+    bitwiseTemplate8<BitWiseOp::AND>(reg);
 }
 
-void CPU::AND(Register target) {
+void CPU::OR(Register reg) {
 
-    reg_A &= *selectReg(target);
-
-    if (reg_A == 0) setFlagZero();
-    else resetFlagZero();
-
-    resetFlagSub();
-    setFlagHCarry();
-    resetFlagCarry();
+    bitwiseTemplate8<BitWiseOp::OR>(reg);
 }
 
-void CPU::OR(Register target) {
+void CPU::XOR(Register reg) {
 
-    reg_A |= *selectReg(target);
-
-    if (reg_A == 0) setFlagZero();
-    else resetFlagZero();
-
-    resetFlagSub();
-    resetFlagHCarry();
-    resetFlagCarry();
+   bitwiseTemplate8<BitWiseOp::XOR>(reg);
 }
 
-void CPU::XOR(Register target) {
+void CPU::CP(Register reg) {
 
-    reg_A ^= *selectReg(target);
-
-    if (reg_A == 0) setFlagZero();
-    else resetFlagZero();
-
-    resetFlagSub();
-    resetFlagHCarry();
-    resetFlagCarry();
-}
-
-void CPU::CP(Register target) {
-
-    Value8 val = *selectReg(target);
-
-    if (reg_A == val) setFlagZero();
-    else resetFlagZero();
-
-    setFlagSub();
-
-    if ((val & 0xF) > (reg_A & 0xF) ) setFlagHCarry();
-    else resetFlagHCarry();
-
-    if (val > reg_A ) setFlagCarry();
-    else resetFlagCarry();
+    bitwiseTemplate8<BitWiseOp::CP>(reg);
 }
