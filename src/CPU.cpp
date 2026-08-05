@@ -199,7 +199,7 @@ void CPU::AND(Source8 source) {
 
 void CPU::AND(Address address) {
 
-    AND(RAM->)
+    AND(RAM->readByteMem(address));
 }
 
 void CPU::OR(Value8 val) {
@@ -217,6 +217,11 @@ void CPU::OR(Source8 source) {
     OR(getVal(source));
 }
 
+void CPU::OR(Address address) {
+
+    OR(RAM->readByteMem(address));
+}
+
 void CPU::XOR(Value8 val) {
 
     reg_A ^= val;
@@ -232,6 +237,11 @@ void CPU::XOR(Source8 source) {
     XOR(getVal(source));
 }
 
+void CPU::XOR(Address address) {
+
+    XOR(RAM->readByteMem(address));
+}
+
 void CPU::CP(Value8 val) {
 
     setZero(reg_A == val);
@@ -243,4 +253,9 @@ void CPU::CP(Value8 val) {
 void CPU::CP(Source8 source) {
 
     CP(getVal(source));
+}
+
+void CPU::CP(Address address) {
+
+    CP(RAM->readByteMem(address));
 }
