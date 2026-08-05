@@ -2,190 +2,245 @@
 
 #include <cassert>
 
-Reg* CPU::selectReg(Register target) {
+Value8 CPU::getVal(Source8 source) {
 
+    switch (source) {
 
-    switch (target) {
+    case Source8::A:
+        return reg_A;
 
-    case Register::A:
-        return &reg_A;
+    case Source8::B:
+        return reg_B;
 
-    case Register::B:
-        return &reg_B;
+    case Source8::C:
+        return reg_C;
 
-    case Register::C:
-        return &reg_C;
+    case Source8::D:
+        return reg_D;
 
-    case Register::D:
-        return &reg_D;
+    case Source8::E:
+        return reg_E;
 
-    case Register::E:
-        return &reg_E;
-
-    case Register::H:
-        return &reg_H;
+    case Source8::H:
+        return reg_H;
         
-    case Register::L:
-        return &reg_L;
+    case Source8::L:
+        return reg_L;
 
     default:
         assert(0 && "Invalid Register for Op");
-        return nullptr;
+        return 0;
     }
 }
 
-// General template for all 8 bit add operations
-template <bool isInc>
-void CPU::addTemplate8(Register reg) {
+void CPU::setVal(Source8 source, Value8 val) {
 
-    Reg* targetReg;
-    Value8 valToAdd;
-    bool carryIn;
+    switch (source) {
 
-    if constexpr (isInc) targetReg = selectReg(reg);
-    else targetReg = &reg_A;
+    case Source8::A:
+        reg_A = val;
+        break;
 
-    if constexpr (isInc) valToAdd = 1;
-    else valToAdd = *selectReg(reg);
+    case Source8::B:
+        reg_B = val;
+        break;
 
-    if constexpr (isInc) carryIn = 0;
-    else carryIn = flagCarry();
+    case Source8::C:
+        reg_C = val;
+        break;
 
-    Value16 newVal = *targetReg + valToAdd + carryIn;
+    case Source8::D:
+        reg_D = val;
+        break;
 
-    resetFlagSub();
+    case Source8::E:
+        reg_E = val;
+        break;
 
-    if ((*targetReg & 0xF) + (valToAdd & 0xF) + carryIn > 0xF) setFlagHCarry();
-    else resetFlagHCarry();
+    case Source8::H:
+        reg_H = val;
+        break;
 
-    if constexpr (!isInc) {
+    case Source8::L:
+        reg_L = val;
+        break;
 
-        if (newVal >= 256) setFlagCarry();
-        else resetFlagCarry();
-    }
-
-    *targetReg = static_cast<Value8>(newVal);
-
-    if (*targetReg == 0) setFlagZero();
-    else resetFlagZero();
-}
-
-void CPU::ADC(Register reg) {
-
-    addTemplate8<false>(reg);
-}
-
-void CPU::ADD(Register reg) {
-
-    resetFlagCarry();
-    addTemplate8<false>(reg);
-}
-
-void CPU::INC(Register reg) {
-
-    addTemplate8<true>(reg);
-}
-
-template <bool isDec>
-void CPU::subTemplate8(Register reg) {
-
-    Reg* targetReg;
-    Value8 valToSub;
-    bool carryIn;
-
-    if constexpr (isDec) targetReg = selectReg(reg);
-    else targetReg = &reg_A;
-
-    if constexpr (isDec) valToSub = 1;
-    else valToSub = *selectReg(reg);
-
-    if constexpr (isDec) carryIn = 0;
-    else carryIn = flagCarry();
-
-    setFlagSub();
-
-    if ((valToSub & 0xF) + carryIn > (*targetReg & 0xF) ) setFlagHCarry();
-    else resetFlagHCarry();
-
-    if constexpr (!isDec) {
-
-        if (valToSub + carryIn > *targetReg) setFlagCarry();
-        else resetFlagCarry();
-    }
-
-    *targetReg -= valToSub + carryIn ;
-
-    if (*targetReg == 0) setFlagZero();
-    else resetFlagZero();
-}
-
-void CPU::SBC(Register reg) {
-
-    subTemplate8<false>(reg);
-}
-
-void CPU::SUB(Register reg) {
-
-    resetFlagCarry();
-    subTemplate8<false>(reg);
-}
-
-void CPU::DEC(Register reg) {
-
-    subTemplate8<true>(reg);
-}
-
-template <BitWiseOp op>
-void CPU::bitwiseTemplate8(Register reg) {
-
-    Reg* targetReg = selectReg(reg);
-
-    if constexpr (op == BitWiseOp::AND) reg_A &= *targetReg;
-    else if constexpr (op == BitWiseOp::OR) reg_A |= *targetReg;
-    else if constexpr (op == BitWiseOp::XOR) reg_A ^= *targetReg;
-
-    if constexpr (op == BitWiseOp::CP) {
-
-        if (reg_A == *targetReg) setFlagZero();
-        else resetFlagZero();
-
-        setFlagSub();
-
-        if ((*targetReg & 0xF) > (reg_A & 0xF) ) setFlagHCarry();
-        else resetFlagHCarry();
-
-        if (*targetReg > reg_A ) setFlagCarry();
-        else resetFlagCarry();
-    }
-    else {
-
-        if (reg_A == 0) setFlagZero();
-        else resetFlagZero();
-
-        resetFlagSub();
-        resetFlagCarry();
-
-        if constexpr (op == BitWiseOp::AND) setFlagHCarry();
-        else resetFlagHCarry();
+    default:
+        assert(0 && "Invalid Register for Op");
     }
 }
 
-void CPU::AND(Register reg) {
+void CPU::ADD(Value8 valToAdd) {
 
-    bitwiseTemplate8<BitWiseOp::AND>(reg);
+    Value16 res = reg_A + valToAdd;
+
+    setZero(res == 0);
+    setSub(false);
+    setHCarry((reg_A & 0xF) + (valToAdd & 0xF) > 0xF);
+    setCarry(res >= 256);
+
+    reg_A = static_cast<Value8>(res);
 }
 
-void CPU::OR(Register reg) {
+void CPU::ADD(Source8 source) {
 
-    bitwiseTemplate8<BitWiseOp::OR>(reg);
+    ADD(getVal(source));
 }
 
-void CPU::XOR(Register reg) {
+void CPU::ADD(Address address) {
 
-   bitwiseTemplate8<BitWiseOp::XOR>(reg);
+    ADD(RAM->readByteMem(address));
 }
 
-void CPU::CP(Register reg) {
+void CPU::ADC(Value8 valToAdd) {
+    
+    Value16 res = reg_A + valToAdd + flagCarry();
 
-    bitwiseTemplate8<BitWiseOp::CP>(reg);
+    setZero(res == 0);
+    setSub(false);
+    setHCarry((reg_A & 0xF) + (valToAdd & 0xF) + flagCarry() > 0xF);
+    setCarry(res >= 256);
+
+    reg_A = static_cast<Value8>(res);
+}
+
+void CPU::ADC(Source8 source) {
+
+    ADC(getVal(source));
+}
+
+void CPU::ADC(Address address) {
+
+    ADC(RAM->readByteMem(address));
+}
+
+void CPU::SUB(Value8 valToSub) {
+
+    setSub(true);
+    setHCarry((valToSub & 0xF) > (reg_A & 0xF));
+    setCarry(valToSub > reg_A);
+
+    reg_A -= valToSub;
+
+    setZero(reg_A == 0);
+}
+
+void CPU::SUB(Source8 source) {
+    
+    SUB(getVal(source));
+}
+
+void CPU::SUB(Address address) {
+
+    SUB(RAM->readByteMem(address));
+}
+
+void CPU::SBC(Value8 valToSub) {
+
+    setSub(true);
+    setHCarry((valToSub & 0xF) + flagCarry() > (reg_A & 0xF));
+    setCarry(valToSub + flagCarry() > reg_A);
+
+    reg_A -= valToSub + flagCarry();
+
+    setZero(reg_A == 0);
+}
+
+void CPU::SBC(Source8 source) {
+
+    SBC(getVal(source));
+}
+
+void CPU::SBC(Address address) {
+
+    SUB(RAM->readByteMem(address));
+}
+
+void CPU::INC(Source8 source) {
+
+    Value8 res = getVal(source);
+
+    setHCarry((res & 0xF) + 1 > 0xF);
+
+    res++;
+    setVal(source, res);
+
+    setZero(res == 0);
+    setSub(false);
+}
+
+void CPU::DEC(Source8 source) {
+
+    Value8 res = getVal(source);
+    
+    setHCarry((res & 0xF) == 0);
+
+    res--;
+    setVal(source, res);
+
+    setZero(res == 0);
+    setSub(true);
+}
+
+void CPU::AND(Value8 val) {
+
+    reg_A &= val;
+
+    setZero(reg_A == 0);
+    setSub(false);
+    setHCarry(true);
+    setCarry(false);
+}
+
+void CPU::AND(Source8 source) {
+
+    AND(getVal(source));
+}
+
+void CPU::AND(Address address) {
+
+    AND(RAM->)
+}
+
+void CPU::OR(Value8 val) {
+
+    reg_A |= val;
+
+    setZero(reg_A == 0);
+    setSub(false);
+    setHCarry(false);
+    setCarry(false);
+}
+
+void CPU::OR(Source8 source) {
+
+    OR(getVal(source));
+}
+
+void CPU::XOR(Value8 val) {
+
+    reg_A ^= val;
+
+    setZero(reg_A == 0);
+    setSub(false);
+    setHCarry(false);
+    setCarry(false);
+}
+
+void CPU::XOR(Source8 source) {
+
+    XOR(getVal(source));
+}
+
+void CPU::CP(Value8 val) {
+
+    setZero(reg_A == val);
+    setSub(true);
+    setHCarry((val & 0xF) > (reg_A & 0xF));
+    setCarry(val > reg_A);
+}
+
+void CPU::CP(Source8 source) {
+
+    CP(getVal(source));
 }

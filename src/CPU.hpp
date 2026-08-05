@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cstdint>
-
 #include "Types.hpp"
 #include "Memory.hpp"
 
@@ -14,29 +12,8 @@ public:
     CPU(Memory* mem) : RAM(mem) {}
 
     // 8 bit registers
-    inline uint8_t getA()         { return reg_A; }
-    inline void setA(uint8_t val) { reg_A = val; }
-
-    inline uint8_t getB()         { return reg_B; }
-    inline void setB(uint8_t val) { reg_B = val; }
-
-    inline uint8_t getC()         { return reg_C; }
-    inline void setC(uint8_t val) { reg_C = val; }
-
-    inline uint8_t getD()         { return reg_D; }
-    inline void setD(uint8_t val) { reg_D = val; }
-
-    inline uint8_t getE()         { return reg_E; }
-    inline void setE(uint8_t val) { reg_E = val; }
-
-    inline uint8_t getF()         { return reg_F; }
-    inline void setF(uint8_t val) { reg_F = val; }
-
-    inline uint8_t getH()         { return reg_H; }
-    inline void setH(uint8_t val) { reg_H = val; }
-
-    inline uint8_t getL()         { return reg_L; }
-    inline void setL(uint8_t val) { reg_L = val;  }
+    Value8 getVal(Source8 source);
+    void setVal(Source8 source, Value8 val);
 
     // Combined virtual 16 bit registers
     inline uint16_t getAF() {
@@ -76,63 +53,73 @@ public:
     inline bool flagHCarry() { return reg_F & 0x20; }
     inline bool flagCarry()  { return reg_F & 0x10; }
 
-    inline void setFlagZero()   { reg_F |= 0x80; }
-    inline void setFlagSub()    { reg_F |= 0x40; }
-    inline void setFlagHCarry() { reg_F |= 0x20; }
-    inline void setFlagCarry()  { reg_F |= 0x10; }
+    inline void setZero(bool res) {
+        if (res) reg_F |= 0x80;
+        else reg_F &= 0x7F; 
+    }
 
-    inline void resetFlagZero()   { reg_F &= 0x7F; }
-    inline void resetFlagSub()    { reg_F &= 0xBF; }
-    inline void resetFlagHCarry() { reg_F &= 0xDF; }
-    inline void resetFlagCarry()  { reg_F &= 0xEF; }
+    inline void setSub(bool res) {
+        if (res) reg_F |= 0x40;
+        else reg_F &= 0xBF;
+    }
+
+    inline void setHCarry(bool res) {
+        if (res) reg_F |= 0x20;
+        else reg_F &= 0xDF; 
+    }
+
+    inline void setCarry(bool res) {
+        if (res) reg_F |= 0x10;
+        else reg_F &= 0xEF;
+    }
     
-    // Instructions
-    void ADC(Register reg);
-    void SBC(Register reg);
-    
-    void ADD(Register reg);
-    void SUB(Register reg);
+    // Instructions 
+    void ADD(Value8 valToAdd);
+    void ADD(Source8 reg);
+    void ADD(Address address);
 
-    void INC(Register reg);
-    void DEC(Register reg);
+    void ADC(Value8 valToAdd);
+    void ADC(Source8 reg);
+    void ADC(Address address);
 
-    void AND(Register reg);
-    void OR(Register reg);
-    void XOR(Register reg);
-    void CP(Register reg);
+    void SUB(Value8 valToSub);
+    void SUB(Source8 reg);
+    void SUB(Address address);
 
-    void ADC_HL();
-    void SBC_HL();
-    
-    void ADD8_HL();
-    void SUB8_HL();
+    void SBC(Value8 valToSub);
+    void SBC(Source8 reg);
+    void SBC(Address address);
 
-    void AND_HL();
-    void OR_HL();
-    void XOR_HL();
-    void CP_HL();
+    void INC(Source8 reg);
+
+    void DEC(Source8 reg);
+
+    void AND(Value8 val);
+    void AND(Source8 reg);
+    void AND(Address address);
+
+    void OR(Value8 val);
+    void OR(Source8 reg);
+    void OR(Address address);
+
+    void XOR(Value8 val);
+    void XOR(Source8 reg);
+    void XOR(Address address);
+
+    void CP(Value8 val);
+    void CP(Source8 reg);
+    void CP(Address address);
 
 private:
     
-    Reg reg_A = 0;
-    Reg reg_B = 0;
-    Reg reg_C = 0;
-    Reg reg_D = 0;
-    Reg reg_E = 0;
-    Reg reg_F = 0;
-    Reg reg_H = 0;
-    Reg reg_L = 0;
+    Reg8 reg_A = 0;
+    Reg8 reg_B = 0;
+    Reg8 reg_C = 0;
+    Reg8 reg_D = 0;
+    Reg8 reg_E = 0;
+    Reg8 reg_F = 0;
+    Reg8 reg_H = 0;
+    Reg8 reg_L = 0;
 
     Memory* RAM;
-
-    Reg* CPU::selectReg(Register target);
-
-    template <bool isInc>
-    void CPU::addTemplate8(Register reg);
-
-    template <bool isDec>
-    void CPU::subTemplate8(Register reg);
-
-    template <BitWiseOp op>
-    void CPU::bitwiseTemplate8(Register reg);
 };

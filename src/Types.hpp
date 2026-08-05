@@ -1,14 +1,17 @@
 #pragma once
 
-using Reg = uint8_t;
+#include <cstdint>
+
+using Reg8 = uint8_t;
+using Reg16 = uint16_t;
 
 using Value8 = uint8_t;
 using Value16 = uint16_t;
 
 using Address = uint16_t;
 
-enum class Register {
-    A, B, C, D, E, F, H, L, HL
+enum class Source8 {
+    A, B, C, D, E, F, H, L
 };
 
 enum class BitWiseOp {
