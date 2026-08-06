@@ -153,7 +153,7 @@ void CPU::SBC(Source8 source) {
 
 void CPU::SBC(Address address) {
 
-    SUB(RAM->readByteMem(address));
+    SBC(RAM->readByteMem(address));
 }
 
 void CPU::INC(Source8 source) {
@@ -169,6 +169,19 @@ void CPU::INC(Source8 source) {
     setSub(false);
 }
 
+void CPU::INC(Address address) {
+
+    Value8 res = RAM->readByteMem(address);
+
+    setHCarry((res & 0xF) + 1 > 0xF);
+
+    res++;
+    RAM->writeByteMem(address, res);
+
+    setZero(res == 0);
+    setSub(false);
+}
+
 void CPU::DEC(Source8 source) {
 
     Value8 res = getVal(source);
@@ -177,6 +190,19 @@ void CPU::DEC(Source8 source) {
 
     res--;
     setVal(source, res);
+
+    setZero(res == 0);
+    setSub(true);
+}
+
+void CPU::DEC(Address address) {
+
+    Value8 res = RAM->readByteMem(address);
+    
+    setHCarry((res & 0xF) == 0);
+
+    res--;
+    RAM->writeByteMem(address, res);
 
     setZero(res == 0);
     setSub(true);

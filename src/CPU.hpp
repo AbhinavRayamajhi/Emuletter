@@ -91,8 +91,10 @@ public:
     void SBC(Address address);
 
     void INC(Source8 reg);
+    void INC(Address address);
 
     void DEC(Source8 reg);
+    void DEC(Address address);
 
     void AND(Value8 val);
     void AND(Source8 reg);
