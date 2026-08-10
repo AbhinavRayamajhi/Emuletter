@@ -49,6 +49,7 @@ public:
     void ADD(Value8 valToAdd);
     void ADD(Source8 reg);
     void ADD(Address address);
+    void ADD_HL(Source16 reg);
 
     void ADC(Value8 valToAdd);
     void ADC(Source8 reg);
@@ -64,9 +65,11 @@ public:
 
     void INC(Source8 reg);
     void INC(Address address);
+    void INC(Source16 source);
 
     void DEC(Source8 reg);
     void DEC(Address address);
+    void DEC(Source16 source);
 
     void AND(Value8 val);
     void AND(Source8 reg);

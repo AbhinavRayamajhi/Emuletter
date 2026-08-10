@@ -143,6 +143,19 @@ void CPU::ADD(Address address) {
     ADD(RAM->readByteMem(address));
 }
 
+void CPU::ADD_HL(Source16 reg) {
+
+    Value16 valToAdd = getVal16(reg);
+    Value16 target = getVal16(Source16::HL);
+    Value32 res = target + valToAdd;
+
+    setSub(false);
+    setHCarry((target & 0xFFF) + (valToAdd & 0xFFF) > 0xFFF);
+    setCarry(res >= 65536);
+
+    setVal16(Source16::HL, static_cast<Value16>(res));
+}
+
 void CPU::ADC(Value8 valToAdd) {
     
     Value16 res = reg_A + valToAdd + flagCarry();
@@ -233,6 +246,11 @@ void CPU::INC(Address address) {
     setSub(false);
 }
 
+void CPU::INC(Source16 source) {
+
+    setVal16(source, getVal16(source) + 1);
+}
+
 void CPU::DEC(Source8 source) {
 
     Value8 res = getVal(source);
@@ -257,6 +275,11 @@ void CPU::DEC(Address address) {
 
     setZero(res == 0);
     setSub(true);
+}
+
+void CPU::DEC(Source16 source) {
+
+    setVal16(source, getVal16(source) - 1);
 }
 
 void CPU::AND(Value8 val) {

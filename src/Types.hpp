@@ -7,6 +7,7 @@ using Reg16 = uint16_t;
 
 using Value8 = uint8_t;
 using Value16 = uint16_t;
+using Value32 = uint32_t;
 
 using Address = uint16_t;
 
