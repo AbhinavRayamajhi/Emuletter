@@ -70,6 +70,57 @@ void CPU::setVal(Source8 source, Value8 val) {
     }
 }
 
+Value16 CPU::getVal16(Source16 source) {
+
+    switch (source) {
+
+    case Source16::AF:
+        return (static_cast<uint16_t>(reg_A) << 8) | reg_F;
+
+    case Source16::BC:
+        return (static_cast<uint16_t>(reg_B) << 8) | reg_C;
+
+    case Source16::DE:
+        return (static_cast<uint16_t>(reg_D) << 8) | reg_E;
+
+    case Source16::HL:
+        return (static_cast<uint16_t>(reg_H) << 8) | reg_L;
+
+    default:
+        assert(0 && "Invalid Register for Op");
+        return 0;
+    }
+}
+
+void CPU::setVal16(Source16 source, Value16 val) {
+
+    switch (source) {
+
+    case Source16::AF:
+        reg_A = static_cast<uint8_t>(val >> 8);
+        reg_F = static_cast<uint8_t>(val);
+        break;
+
+    case Source16::BC:
+        reg_B = static_cast<uint8_t>(val >> 8);
+        reg_C = static_cast<uint8_t>(val);
+        break;
+
+    case Source16::DE:
+        reg_D = static_cast<uint8_t>(val >> 8);
+        reg_E = static_cast<uint8_t>(val);
+        break;
+
+    case Source16::HL:
+        reg_H = static_cast<uint8_t>(val >> 8);
+        reg_L = static_cast<uint8_t>(val);
+        break;
+
+    default:
+        assert(0 && "Invalid Register for Op");
+    }
+}
+
 void CPU::ADD(Value8 valToAdd) {
 
     Value16 res = reg_A + valToAdd;

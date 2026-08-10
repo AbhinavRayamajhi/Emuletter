@@ -14,6 +14,7 @@ enum class Source8 {
     A, B, C, D, E, F, H, L
 };
 
-enum class BitWiseOp {
-    AND, OR, XOR, CP
+enum class Source16 {
+    AF, BC, DE, HL
 };
+

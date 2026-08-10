@@ -16,36 +16,8 @@ public:
     void setVal(Source8 source, Value8 val);
 
     // Combined virtual 16 bit registers
-    inline uint16_t getAF() {
-        return (static_cast<uint16_t>(reg_A) << 8) | reg_F;
-    }
-    inline void setAF(uint16_t val) {
-        reg_A = static_cast<uint8_t>(val >> 8);
-        reg_F = static_cast<uint8_t>(val);
-    }
-
-    inline uint16_t getBC() {
-        return (static_cast<uint16_t>(reg_B) << 8) | reg_C;
-    }
-    inline void setBC(uint16_t val) { reg_B = static_cast<uint8_t>(val >> 8);
-        reg_C = static_cast<uint8_t>(val);
-    }
-
-    inline uint16_t getDE() {
-        return (static_cast<uint16_t>(reg_D) << 8) | reg_E;
-    }
-    inline void setDE(uint16_t val) {
-        reg_D = static_cast<uint8_t>(val >> 8);
-        reg_E = static_cast<uint8_t>(val);
-    }
-
-    inline uint16_t getHL() {
-        return (static_cast<uint16_t>(reg_H) << 8) | reg_L;
-    }
-    inline void setHL(uint16_t val) {
-        reg_H = static_cast<uint8_t>(val >> 8);
-        reg_L = static_cast<uint8_t>(val);
-    }
+    Value16 getVal16(Source16 source);
+    void setVal16(Source16 source, Value16 val);
 
     // Flag register (F)
     inline bool flagZero()   { return reg_F & 0x80; }
