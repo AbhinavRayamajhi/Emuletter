@@ -9,6 +9,8 @@ using Value8 = uint8_t;
 using Value16 = uint16_t;
 using Value32 = uint32_t;
 
+using SValue8 = int8_t;
+
 using Address = uint16_t;
 
 enum class Source8 {
@@ -16,6 +18,6 @@ enum class Source8 {
 };
 
 enum class Source16 {
-    AF, BC, DE, HL
+    AF, BC, DE, HL, SP
 };
 

@@ -86,6 +86,9 @@ Value16 CPU::getVal16(Source16 source) {
     case Source16::HL:
         return (static_cast<uint16_t>(reg_H) << 8) | reg_L;
 
+    case Source16::SP:
+        return reg_SP;
+
     default:
         assert(0 && "Invalid Register for Op");
         return 0;
@@ -114,6 +117,10 @@ void CPU::setVal16(Source16 source, Value16 val) {
     case Source16::HL:
         reg_H = static_cast<uint8_t>(val >> 8);
         reg_L = static_cast<uint8_t>(val);
+        break;
+
+    case Source16::SP:
+        reg_SP = val;
         break;
 
     default:
@@ -154,6 +161,19 @@ void CPU::ADD_HL(Source16 reg) {
     setCarry(res >= 65536);
 
     setVal16(Source16::HL, static_cast<Value16>(res));
+}
+
+void CPU::ADD_SP(SValue8 val) {
+
+    setZero(false);
+    setSub(false);
+
+    Value8 uVal = static_cast<Value8>(val);
+
+    setHCarry((reg_SP & 0xF) + (uVal & 0xF) > 0xF);
+    setCarry((reg_SP & 0xFF) + (uVal & 0xFF) > 0xFF);
+
+    reg_SP += val;
 }
 
 void CPU::ADC(Value8 valToAdd) {
@@ -358,4 +378,29 @@ void CPU::CP(Source8 source) {
 void CPU::CP(Address address) {
 
     CP(RAM->readByteMem(address));
+}
+
+void CPU::LD8(Source8 dest, Value8 val) {
+
+    setVal(dest, val);
+}
+
+void CPU::LD8(Source8 dest, Source8 source) {
+
+    setVal(dest, getVal(source));
+}
+
+void CPU::LD8(Source8 dest, Address address) {
+
+    setVal(dest, RAM->readByteMem(address));
+}
+
+void CPU::LD8(Address address, Source8 source) {
+
+    RAM->writeByteMem(address, getVal(source));
+}
+
+void CPU::LD8(Address address, Value8 val) {
+
+    RAM->writeByteMem(address, val);
 }
