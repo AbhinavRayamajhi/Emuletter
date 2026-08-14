@@ -404,3 +404,32 @@ void CPU::LD8(Address address, Value8 val) {
 
     RAM->writeByteMem(address, val);
 }
+
+void CPU::LD16(Source16 dest, Value16 val) {
+
+    setVal16(dest, val);
+}
+
+void CPU::LD16(Source16 dest, Source16 source) {
+
+    setVal16(dest, getVal16(source));
+}
+
+void CPU::LD_SP(Address address) {
+
+    RAM->writeByteMem(address, reg_SP & 0xFF);
+    RAM->writeByteMem(address + 1, (reg_SP & 0xFF00) >> 8);
+}
+
+void CPU::LD_HL_SP(SValue8 val) {
+
+    setZero(false);
+    setSub(false);
+
+    Value8 uVal = static_cast<Value8>(val);
+
+    setHCarry((reg_SP & 0xF) + (uVal & 0xF) > 0xF);
+    setCarry((reg_SP & 0xFF) + (uVal & 0xFF) > 0xFF);
+
+    setVal16(Source16::HL, reg_SP + val);
+}

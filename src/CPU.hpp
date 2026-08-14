@@ -101,6 +101,12 @@ public:
     void LD8(Address address, Source8 source);
     void LD8(Address address, Value8 val);
 
+    void LD16(Source16 dest, Value16 val);
+    void LD16(Source16 dest, Source16 source);
+
+    void LD_SP(Address address);
+    void LD_HL_SP(SValue8 val);
+
 private:
     
     Reg8 reg_A = 0;
