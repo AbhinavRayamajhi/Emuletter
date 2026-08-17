@@ -433,3 +433,15 @@ void CPU::LD_HL_SP(SValue8 val) {
 
     setVal16(Source16::HL, reg_SP + val);
 }
+
+Value8 CPU::fetchByte() {
+
+    return RAM->readByteMem(reg_PC++);
+}
+
+Value16 CPU::fetchWord() {
+
+    Value16 res = RAM->readByteMem(reg_PC++);
+    res |= RAM->readByteMem(reg_PC++) << 8;
+    return res;
+}

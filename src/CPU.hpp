@@ -107,6 +107,9 @@ public:
     void LD_SP(Address address);
     void LD_HL_SP(SValue8 val);
 
+    Value8 fetchByte();
+    Value16 fetchWord();
+
 private:
     
     Reg8 reg_A = 0;
